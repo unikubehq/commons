@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Keycloak Test</title>
+    <script src="http://keycloak.127.0.0.1.nip.io:8085/auth/js/keycloak.js"></script>
+    <script src="http://keycloak.127.0.0.1.nip.io:8085/auth/js/keycloak-authz.js"></script>
+    <script>
+        function parseJwt(token) {
+            try {
+    // Get Token Header
+    const base64HeaderUrl = token.split('.')[0];
+    const base64Header = base64HeaderUrl.replace('-', '+').replace('_', '/');
+    const headerData = JSON.parse(window.atob(base64Header));
+
+    // Get Token payload and date's
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace('-', '+').replace('_', '/');
+    const dataJWT = JSON.parse(window.atob(base64));
+    dataJWT.header = headerData;
+
+// TODO: add expiration at check ...
+
+
+    return dataJWT;
+  } catch (err) {
+    return false;
+  }
+        }
+    </script>
+    <script>
+
+        var keycloak = new Keycloak({
+            url: 'http://keycloak.127.0.0.1.nip.io:8085/auth',
+            realm: 'unikube',
+            clientId: 'frontend'
+        });
+        keycloak.init()
+        var authorization = new KeycloakAuthorization(keycloak);
+        authorization.init()
+
+    </script>
+    <script>
+        var login = function () {
+            keycloak.login({})
+        };
+
+        var alertToken = function () {
+            // req.setRequestHeader('Authorization', 'Bearer ' + keycloak.token);
+
+            var decoded = parseJwt(keycloak.token);
+            console.log(decoded)
+            json = JSON.stringify(decoded,null,2);
+            document.getElementById("json").innerText = json;
+
+        };
+        var requestGateway = function () {
+            var url = 'http://gateway.unikube.127.0.0.1.nip.io:8085/';
+
+            var req = new XMLHttpRequest();
+            req.open('GET', url, true);
+            // req.setRequestHeader('Accept', 'application/json');
+            req.setRequestHeader('Authorization', 'Bearer ' + keycloak.token);
+
+            req.onreadystatechange = function () {
+                if (req.readyState == 4) {
+                    if (req.status == 200) {
+                        alert(req.responseText);
+                    } else if (req.status == 403) {
+                        alert('Forbidden');
+                    }
+                }
+            }
+
+            req.send();
+
+        };
+        var authz = function (){
+
+
+            authorization.entitlement('gateway').then(function (rpt) {
+                var decoded = parseJwt(rpt);
+                console.log(decoded)
+                json = JSON.stringify(decoded,null,2);
+                document.getElementById("json").innerText = json;
+
+            });
+
+        }
+    </script>
+</head>
+<body>
+    <button onclick="login()">Login</button>
+    <button onclick="alertToken()">Alert Token</button>
+    <button onclick="requestGateway()">Request Gateway</button>
+    <button onclick="authz()">Alert RPT</button>
+    <pre id="json"></pre>
+</body>
+</html>
