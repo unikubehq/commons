@@ -34,4 +34,5 @@ jobs:
         black --check --line-length=120 commons/
     - name: Test with django tests
       run: |
+        python manage.py migrate
         coverage run manage.py test
