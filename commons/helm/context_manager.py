@@ -38,7 +38,7 @@ class HelmCharts:
         output_dir = self.rendered_chart_dir.name
         # deck.values starts with /. That needs to be excluded.
         values = os.path.join(self.directory, self.values_path.lstrip("/"))
-        name = self.deck.title
+        name = utils.slugify(self.deck.title)
         chart = f"{self.deck.title}/"
         parameters = self.get_additional_render_parameters(self.deck)
         command = utils.get_command(output_dir, values, name, chart, *parameters, secrets=bool(self.deck.sops))

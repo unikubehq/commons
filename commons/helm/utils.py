@@ -82,3 +82,44 @@ def get_command(output_dir, values, name, chart, *args, secrets=False):
         ]
     )
     return command
+
+
+# kudos https://www.peterbe.com/plog/fastest-python-function-to-slugify-a-string
+non_url_safe = [
+    '"',
+    "#",
+    "$",
+    "%",
+    "&",
+    "+",
+    ",",
+    "/",
+    ":",
+    ";",
+    "=",
+    "?",
+    "@",
+    "[",
+    "\\",
+    "]",
+    "^",
+    "`",
+    "{",
+    "|",
+    "}",
+    "~",
+    "'",
+]
+
+
+def slugify(text):
+    """
+    Turn the text content of a header into a slug for use in an ID
+    """
+    non_safe = [c for c in text if c in non_url_safe]
+    if non_safe:
+        for c in non_safe:
+            text = text.replace(c, "")
+    # Strip leading, trailing and multiple whitespace, convert remaining whitespace to _
+    text = "_".join(text.split())
+    return text
