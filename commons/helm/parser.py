@@ -40,7 +40,7 @@ class ChartYamlParser:
                     type=service_type,
                     description=service_description,
                     dir_path=dir_path,
-                    file_information=self._retrieve_file_information(dir_path),
+                    file_information=self._retrieve_file_information(os.path.dirname(file_path)),
                     environments=[],
                 )
 
