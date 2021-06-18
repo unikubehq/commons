@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import subprocess
 import tempfile
 
@@ -21,13 +20,13 @@ class HelmCharts:
     """
 
     def __init__(self, repository_directory, deck: DeckData, values_path: str):
-        self.directory = repository_directory
+        self.repository_directory = repository_directory
         self.deck = deck
         self.values_path = values_path
 
     def __enter__(self):
         # check dependencies
-        directory = os.path.join(self.directory, self.deck.title)
+        directory = os.path.join(self.repository_directory, self.deck.dir_path)
         utils.check_helm_dependencies(directory)
 
         # create tempdir for output
@@ -37,16 +36,16 @@ class HelmCharts:
         # generate command and env
         output_dir = self.rendered_chart_dir.name
         # deck.values starts with /. That needs to be excluded.
-        values = os.path.join(self.directory, self.values_path.lstrip("/"))
+        values = os.path.join(self.repository_directory, self.values_path.lstrip("/"))
         name = utils.slugify(self.deck.title)
-        chart = f"{self.deck.title}/"
+        chart = os.path.join(".", self.deck.dir_path)
         parameters = self.get_additional_render_parameters(self.deck)
         command = utils.get_command(output_dir, values, name, chart, *parameters, secrets=bool(self.deck.sops))
         env = self._get_env()
 
         # execute command
-        logger.debug(f"running: {command}, in dir {self.directory}")
-        process = utils.execute(command, cwd=self.directory, env=env)
+        logger.debug(f"running: {command}, in dir {self.repository_directory}")
+        process = utils.execute(command, cwd=self.repository_directory, env=env)
         logger.debug(f"helm 'template' process ended with: {process.returncode}")
 
         if process.returncode == 0:

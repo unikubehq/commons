@@ -5,8 +5,7 @@ from datetime import datetime
 from typing import List, Tuple
 
 import yaml
-from yaml.constructor import ConstructorError
-from yaml.parser import ParserError
+from yaml import MarkedYAMLError
 
 from commons.helm.context_manager import HelmCharts
 from commons.helm.data_classes import (
@@ -26,8 +25,7 @@ class ChartYamlParser:
         self.temporary_directory = temporary_directory
 
     def parse(self, dir_path, fname):
-        file_path = os.path.join(dir_path, fname)
-        return self._read_deck_data(file_path, dir_path)
+        return self._read_deck_data(fname, dir_path)
 
     def _read_deck_data(self, file_path, dir_path) -> DeckData:
         """Retrieves deck information for a given Chart.yaml found in the temporary directory under `file_path`."""
@@ -80,7 +78,7 @@ class ChartYamlParser:
             short_path = os.path.join(file_path[len(self.temporary_directory) :], file_name)
             try:
                 yaml_file = yaml.load(file, Loader=yaml.FullLoader)
-            except (ParserError, ConstructorError):
+            except MarkedYAMLError:
                 return FileInformation(path=short_path, encrypted=False, providers=[])
             sops = yaml_file.get("sops", False)
             encrypted = bool(sops)
@@ -196,10 +194,12 @@ class HelmRepositoryParser:
     def parse_deck_data(self, temp_dir):
         """Iterates through repository structure and triggers Chart.yaml file parsing."""
         for dir_path, dirs, files in os.walk(temp_dir):
-            chart_files = filter(lambda x: x == "Chart.yaml", files)
-            for f in chart_files:
-                deck_data = ChartYamlParser(temp_dir).parse(dir_path, f)
+            chart_files = list(filter(lambda x: x == "Chart.yaml" or x == "chart.yaml", files))
+            if chart_files:
+                f_path = os.path.join(dir_path, chart_files[0])
+                deck_data = ChartYamlParser(temp_dir).parse(os.path.relpath(dir_path, temp_dir), f_path)
                 self.deck_data.append(deck_data)
+                dirs[:] = []  # don't look for any yaml files in sub directories
 
     def get_specs(self, deck_hash, environment, sops=None):
         with Repository(self.url, self.username, self.token, self.branch) as repo:
