@@ -25,7 +25,11 @@ class KeycloakDriver(object):
     _default_client_id = "test-client"
     _default_client_secret = "test-secret"
     _default_realm_name = "test"
-    _default_environment = {"KEYCLOAK_USER": _default_username, "KEYCLOAK_PASSWORD": _default_password}
+    _default_environment = {
+        "KEYCLOAK_USER": _default_username,
+        "KEYCLOAK_PASSWORD": _default_password,
+        "DB_VENDOR": "h2",
+    }
     _test_line = "Http management interface listening on http://127.0.0.1:9990/management"
     _client_session = None
     port = None
