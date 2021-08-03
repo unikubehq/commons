@@ -26,6 +26,16 @@ class HelmRepositoryParserTests(TestCase):
         deck, updated_environment = result[0]
         self.assertEqual(len(updated_environment.specs_data), 18)
 
+    def test_render_with_values(self):
+        parser = HelmRepositoryParser(GIT_REPO_URL)
+        parser.parse()
+        deck = parser.deck_data[0]
+        environment = RenderEnvironment(specs_data=[], values_path="buzzword-counter/values.yaml")
+        environment.set_values = {"DATABASE_NAME": "bumble-bee"}
+        parser.render(*[(deck, environment)])
+        # todo: check that value is set correctly
+        pass
+
     def test_get_specs_data_for_deck_hash(self):
         parser = HelmRepositoryParser(GIT_REPO_URL)
         environment = RenderEnvironment(specs_data=[], values_path="buzzword-counter/values.yaml")

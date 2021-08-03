@@ -1,7 +1,7 @@
 import hashlib
 import logging
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from functools import cached_property
@@ -113,6 +113,7 @@ class SpecsData:
 class RenderEnvironment:
     specs_data: List[SpecsData]
     values_path: str = ""
+    set_values: dict = field(default_factory=dict)
 
 
 @dataclass
