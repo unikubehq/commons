@@ -1,13 +1,14 @@
 import json
-from time import sleep
 
-from hurricane.testing import HurricanAMQPTest, HurricaneAMQPDriver
+from hurricane.testing import HurricaneAMQPDriver, HurricaneAMQPTest
 
 from commons.amqp.producer import TopicProducer
 
 
-class AMQPProducerTests(HurricanAMQPTest):
-    @HurricanAMQPTest.cylce_consumer(
+class AMQPProducerTests(HurricaneAMQPTest):
+    databases = "__all__"
+
+    @HurricaneAMQPTest.cycle_consumer(
         args=["tests.testapp.consumer.MyTestHandler", "--queue", "test", "--exchange", "test"], coverage=False
     )
     def test_send_message(self):
@@ -19,7 +20,7 @@ class AMQPProducerTests(HurricanAMQPTest):
         std, err = self.driver.get_output(read_all=True)
         self.assertIn(json.dumps(body), std)
 
-    @HurricanAMQPTest.cylce_consumer(
+    @HurricaneAMQPTest.cycle_consumer(
         args=["tests.testapp.consumer.MyTestHandler", "--queue", "test", "--exchange", "test"], coverage=False
     )
     def test_send_multiple_message(self):
@@ -56,6 +57,7 @@ class AMQPProducerTests(HurricanAMQPTest):
             ]
             + connection,
             coverage=False,
+            env={},
         )
         consumer2 = HurricaneAMQPDriver()
         consumer2.start_consumer(
@@ -69,6 +71,7 @@ class AMQPProducerTests(HurricanAMQPTest):
             ]
             + connection,
             coverage=False,
+            env={},
         )
         test_topic_producer.publish(body_one)
         _exc = None
