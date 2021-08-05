@@ -113,7 +113,14 @@ class SpecsData:
 class RenderEnvironment:
     specs_data: List[SpecsData]
     values_path: str = ""
-    set_values: dict = field(default_factory=dict)
+    _override_values: dict = field(default_factory=dict)
+
+    @property
+    def override_values(self):
+        return self._override_values
+
+    def set_value(self, key, value):
+        self._override_values[key] = value
 
 
 @dataclass

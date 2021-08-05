@@ -75,8 +75,8 @@ class HelmCharts:
         params = []
         if deck.namespace:
             params.extend([f"--namespace={deck.namespace}"])
-        if environment.set_values:
-            for k, v in environment.set_values.items():
+        if environment.override_values:
+            for k, v in environment.override_values.items():
                 params.extend(["--set", f"{k}={v}"])
         return params
 
