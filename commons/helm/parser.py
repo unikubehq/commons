@@ -180,11 +180,9 @@ class HelmRepositoryParser:
                 result.append((deck, environment))
         return result
 
-    def read_specs_data(self, temp_dir, deck, environment):
+    def read_specs_data(self, temp_dir: str, deck: DeckData, environment: RenderEnvironment):
         result = []
-        with HelmCharts(
-            repository_directory=temp_dir, deck=deck, values_path=environment.values_path
-        ) as kube_files_dir:
+        with HelmCharts(repository_directory=temp_dir, deck=deck, environment=environment) as kube_files_dir:
             for root, dirs, files in os.walk(kube_files_dir):
                 for fname in filter(lambda fname: fname.endswith(".yaml"), files):
                     specs = SpecsParser.read_specs(os.path.join(root, fname))

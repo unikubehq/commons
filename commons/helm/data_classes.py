@@ -1,14 +1,16 @@
 import hashlib
 import logging
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from functools import cached_property
 from typing import List
 
+import yaml
 from git import GitCommandError, Repo
 
+from commons.helm import utils
 from commons.helm.exceptions import RepositoryAuthenticationFailed, RepositoryBranchUnavailable, RepositoryCloningFailed
 
 
@@ -113,6 +115,19 @@ class SpecsData:
 class RenderEnvironment:
     specs_data: List[SpecsData]
     values_path: str = ""
+    _override_values: dict = field(default_factory=dict)
+
+    @property
+    def override_values(self):
+        return self._override_values
+
+    def set_value(self, key, value):
+        self._override_values[key] = value
+
+    def update_values_from_yaml(self, file_content):
+        result = utils.flatten(yaml.safe_load(file_content))
+        for k, v in result.items():
+            self.set_value(k, v)
 
 
 @dataclass

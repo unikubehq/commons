@@ -4,7 +4,7 @@ import subprocess
 import tempfile
 
 from commons.helm import utils
-from commons.helm.data_classes import DeckData, SopsProviderType
+from commons.helm.data_classes import DeckData, RenderEnvironment, SopsProviderType
 from commons.helm.exceptions import HelmChartRenderError, HelmDependencyError
 
 logger = logging.getLogger("projects.helm")
@@ -19,10 +19,11 @@ class HelmCharts:
             ...
     """
 
-    def __init__(self, repository_directory, deck: DeckData, values_path: str):
+    def __init__(self, repository_directory, deck: DeckData, environment: RenderEnvironment):
         self.repository_directory = repository_directory
         self.deck = deck
-        self.values_path = values_path
+        self.environment = environment
+        self.values_path = environment.values_path
 
     def __enter__(self):
         # check dependencies
@@ -39,7 +40,7 @@ class HelmCharts:
         values = os.path.join(self.repository_directory, self.values_path.lstrip("/"))
         name = utils.slugify(self.deck.title)
         chart = os.path.join(".", self.deck.dir_path)
-        parameters = self.get_additional_render_parameters(self.deck)
+        parameters = utils.get_additional_render_parameters(self.deck, self.environment)
         command = utils.get_command(output_dir, values, name, chart, *parameters, secrets=bool(self.deck.sops))
         env = self._get_env()
 
@@ -68,13 +69,6 @@ class HelmCharts:
         # we must set all values to strings, otherwise expect errors
         env = {k: str(v) for k, v in env.items()}
         return env
-
-    @staticmethod
-    def get_additional_render_parameters(deck):
-        params = []
-        if deck.namespace:
-            params.extend([f"--namespace={deck.namespace}"])
-        return params
 
     def _prepare_gpg(self, sops_env: dict) -> None:
         private_key = sops_env["PGP_PRIVATE_KEY"]
