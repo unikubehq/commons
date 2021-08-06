@@ -40,7 +40,7 @@ class HelmCharts:
         values = os.path.join(self.repository_directory, self.values_path.lstrip("/"))
         name = utils.slugify(self.deck.title)
         chart = os.path.join(".", self.deck.dir_path)
-        parameters = self.get_additional_render_parameters(self.deck, self.environment)
+        parameters = utils.get_additional_render_parameters(self.deck, self.environment)
         command = utils.get_command(output_dir, values, name, chart, *parameters, secrets=bool(self.deck.sops))
         env = self._get_env()
 
@@ -69,16 +69,6 @@ class HelmCharts:
         # we must set all values to strings, otherwise expect errors
         env = {k: str(v) for k, v in env.items()}
         return env
-
-    @staticmethod
-    def get_additional_render_parameters(deck: DeckData, environment: RenderEnvironment):
-        params = []
-        if deck.namespace:
-            params.extend([f"--namespace={deck.namespace}"])
-        if environment.override_values:
-            for k, v in environment.override_values.items():
-                params.extend(["--set", f"{k}={v}"])
-        return params
 
     def _prepare_gpg(self, sops_env: dict) -> None:
         private_key = sops_env["PGP_PRIVATE_KEY"]

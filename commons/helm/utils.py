@@ -1,8 +1,10 @@
+import collections
 import logging
 import os
 import re
 import subprocess
 
+from commons.helm.data_classes import DeckData, RenderEnvironment
 from commons.helm.exceptions import HelmDependencyError
 
 logger = logging.getLogger("projects.helm")
@@ -84,6 +86,16 @@ def get_command(output_dir, values, name, chart, *args, secrets=False):
     return command
 
 
+def get_additional_render_parameters(deck: DeckData, environment: RenderEnvironment):
+    params = []
+    if deck.namespace:
+        params.extend([f"--namespace={deck.namespace}"])
+    if environment.override_values:
+        for k, v in environment.override_values.items():
+            params.extend(["--set", f"{k}={v}"])
+    return params
+
+
 # kudos https://www.peterbe.com/plog/fastest-python-function-to-slugify-a-string
 non_url_safe = [
     '"',
@@ -123,3 +135,19 @@ def slugify(text):
     # Strip leading, trailing and multiple whitespace, convert remaining whitespace to _
     text = "_".join(text.split())
     return text
+
+
+def flatten(d, parent_key="", sep="."):
+    items = []
+    for k, v in d.items():
+        if isinstance(k, str):
+            new_key = parent_key + sep + k if parent_key else k
+        elif isinstance(k, int):
+            new_key = parent_key + "[" + str(k) + "]" if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        elif isinstance(v, list):
+            items.extend(flatten(dict(enumerate(v)), new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
