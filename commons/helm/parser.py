@@ -177,8 +177,19 @@ class HelmRepositoryParser:
             for deck, environment in args:
                 specs = self.read_specs_data(repo.working_dir, deck, environment)
                 environment.specs_data = specs
+                environment.values_yaml = self.get_values_yaml(repo.working_dir, environment)
                 result.append((deck, environment))
         return result
+
+    def get_values_yaml(self, temp_dir: str, environment: RenderEnvironment) -> str:
+        values_yaml = ""
+        if environment.values_path:
+            f = open(os.path.join(temp_dir, environment.values_path.lstrip("/")), "r")
+            try:
+                values_yaml = f.read()
+            finally:
+                f.close()
+        return values_yaml
 
     def read_specs_data(self, temp_dir: str, deck: DeckData, environment: RenderEnvironment):
         result = []

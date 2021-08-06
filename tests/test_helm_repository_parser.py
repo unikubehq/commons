@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+import requests
+
 from commons.helm import utils
 from commons.helm.data_classes import DeckData, RenderEnvironment
 from commons.helm.parser import HelmRepositoryParser
@@ -60,6 +62,20 @@ class HelmRepositoryParserTests(TestCase):
         result = parser.render(*[(deck, environment)])
         deck, updated_environment = result[0]
         self.assertTrue(any(["bumble-bee" in i.content for i in updated_environment.specs_data]))
+
+    def test_values_yaml_retrieval(self):
+        parser = HelmRepositoryParser(GIT_REPO_URL)
+        parser.parse()
+        deck = parser.deck_data[0]
+        environment = RenderEnvironment(specs_data=[], values_path="buzzword-counter/values.yaml")
+        result = parser.render(*[(deck, environment)])
+        deck, updated_environment = result[0]
+
+        res = requests.get(
+            "https://raw.githubusercontent.com/Blueshoe/buzzword-charts/master/buzzword-counter/values.yaml"
+        )
+
+        self.assertEqual(updated_environment.values_yaml, res.text)
 
     def test_get_specs_data_for_deck_hash(self):
         parser = HelmRepositoryParser(GIT_REPO_URL)

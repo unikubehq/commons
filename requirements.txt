@@ -10,3 +10,4 @@ python-keycloak~=0.24.0
 python-keycloak-client~=0.2.3
 coverage>=5.3
 coveralls==2.2.0
+requests==2.26.0
