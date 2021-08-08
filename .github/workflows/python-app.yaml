@@ -36,3 +36,23 @@ jobs:
       run: |
         python manage.py migrate
         coverage run manage.py test
+    - name: Upload coverage data to coveralls.io
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COVERALLS_FLAG_NAME: ${{ matrix.python-version }}
+        COVERALLS_PARALLEL: true
+      run: |
+        coveralls --service=github
+  coveralls:
+    name: Indicate completion to coveralls.io
+    # need secrets.GITHUB_TOKEN
+    needs: test
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+    - name: Finished
+      run: |
+        pip3 install --upgrade coveralls
+        coveralls --finish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
