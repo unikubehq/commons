@@ -116,6 +116,7 @@ class RenderEnvironment:
     specs_data: List[SpecsData]
     values_path: str = ""
     _override_values: dict = field(default_factory=dict)
+    values_yaml: str = ""
 
     @property
     def override_values(self):
