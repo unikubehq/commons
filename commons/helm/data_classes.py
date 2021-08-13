@@ -10,7 +10,6 @@ from typing import List
 import yaml
 from git import GitCommandError, Repo
 
-from commons.helm import utils
 from commons.helm.exceptions import RepositoryAuthenticationFailed, RepositoryBranchUnavailable, RepositoryCloningFailed
 
 
@@ -126,6 +125,8 @@ class RenderEnvironment:
         self._override_values[key] = value
 
     def update_values_from_yaml(self, file_content):
+        from commons.helm import utils
+
         result = utils.flatten(yaml.safe_load(file_content))
         for k, v in result.items():
             self.set_value(k, v)
