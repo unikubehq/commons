@@ -38,6 +38,7 @@ setup(
         "commons.graphql",
         "commons.helm",
         "commons.keycloak",
+        "commons.keycloak.testing",
         "commons.middleware",
         "commons.management",
         "commons.management.commands",
