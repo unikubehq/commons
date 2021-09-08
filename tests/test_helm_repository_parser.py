@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 import requests
+import yaml
 
 from commons.helm import utils
 from commons.helm.data_classes import DeckData, RenderEnvironment
@@ -52,6 +53,47 @@ class HelmRepositoryParserTests(TestCase):
         environment.update_values_from_yaml(yaml)
         params = utils.get_additional_render_parameters(deck, environment)
         self.assertIn("b.d[0].name=first", params)
+
+    def test_yaml_files_merging(self):
+        yaml1 = """
+          a: Anna
+          b:
+            c: Cobra
+            d:
+             - name: first
+               value: 1
+             - name: second
+               value: 2
+        """
+        yaml2 = """
+          a: Anton
+          b:
+            d:
+             - name: first
+               value: 1
+             - name: third
+               value: 2
+          z: Zorro
+        """
+        result = utils.merge_multiple_yaml_files(yaml1, yaml2)
+        expected_structure = {
+            "a": "Anton",
+            "b": {"c": "Cobra", "d": [{"name": "first", "value": 1}, {"name": "third", "value": 2}]},
+            "z": "Zorro",
+        }
+        self.assertEqual(result, yaml.dump(expected_structure))
+
+    def test_yaml_files_merging_from_git_repo(self):
+        parser = HelmRepositoryParser(GIT_REPO_URL, branch="sops")
+        parser.parse()
+        deck = parser.deck_data[0]
+        environment = RenderEnvironment(specs_data=[], values_path="buzzword-counter/helm_vars/development")
+        result = parser.render(*[(deck, environment)])
+        deck, updated_environment = result[0]
+        data = yaml.load(updated_environment.values_yaml)
+        self.assertIn("DJANGO_DEBUG", data["environmentVariables"])
+        self.assertIn("CELERY_UID", data["environmentVariables"])
+        self.assertIn("imageCredentials", data)
 
     def test_render_with_values(self):
         parser = HelmRepositoryParser(GIT_REPO_URL)

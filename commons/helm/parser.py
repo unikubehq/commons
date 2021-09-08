@@ -17,6 +17,8 @@ from commons.helm.data_classes import (
     SpecsData,
 )
 
+from . import utils
+
 logger = logging.getLogger("projects.helm")
 
 
@@ -184,11 +186,17 @@ class HelmRepositoryParser:
     def get_values_yaml(self, temp_dir: str, environment: RenderEnvironment) -> str:
         values_yaml = ""
         if environment.values_path:
-            f = open(os.path.join(temp_dir, environment.values_path.lstrip("/")), "r")
-            try:
-                values_yaml = f.read()
-            finally:
-                f.close()
+            path = os.path.join(temp_dir, environment.values_path.lstrip("/"))
+            if os.path.isfile(path):
+                with open(path, "r") as f:
+                    return f.read()
+            elif os.path.isdir(path):
+                file_contents = []
+                for file in os.listdir(path):
+                    if file.endswith(".yml") or file.endswith(".yaml"):
+                        with open(os.path.join(path, file)) as f:
+                            file_contents.append(f.read())
+                return utils.merge_multiple_yaml_files(*file_contents)
         return values_yaml
 
     def read_specs_data(self, temp_dir: str, deck: DeckData, environment: RenderEnvironment):

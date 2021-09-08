@@ -1,8 +1,11 @@
 import collections
+import collections.abc
 import logging
 import os
 import re
 import subprocess
+
+import yaml
 
 from commons.helm.data_classes import DeckData, RenderEnvironment
 from commons.helm.exceptions import HelmDependencyError
@@ -151,3 +154,20 @@ def flatten(d, parent_key="", sep="."):
         else:
             items.append((new_key, v))
     return dict(items)
+
+
+def update_nested_dict(d, u):
+    for k, v in u.items():
+        if isinstance(v, collections.abc.Mapping):
+            d[k] = update_nested_dict(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
+
+
+def merge_multiple_yaml_files(*args):
+    big_data = {}
+    for i in args:
+        data = yaml.load(i)
+        update_nested_dict(big_data, data)
+    return yaml.dump(big_data)
