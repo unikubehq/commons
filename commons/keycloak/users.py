@@ -25,3 +25,11 @@ class UserHandler(KCAdminHandler):
         url = f"{self.admin.get_full_url(self.base_path)}"
         response_data = self._call_api(url, method="post", json=data)
         return UUID.search(response_data["headers"]["location"]).group(0)
+
+    def update(self, user_id: str, data: dict) -> dict:
+        """
+        A "username" update is silently ignored by the API if the keycloak realm does not permit username updates.
+        """
+        url = f"{self.admin.get_full_url(self.base_path)}{user_id}"
+        response_data = self._call_api(url, method="put", json=data)
+        return response_data["status_code"]

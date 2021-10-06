@@ -58,11 +58,28 @@ class KeycloakClientTests(SimpleTestCase):
         uh = UserHandler()
         self.__class__.user_id = uh.create({"username": "testface", "email": "test@blueshoe.de"})
 
-    def test_d2_inspect_user(self):
+    def test_d2a_inspect_user(self):
         uh = UserHandler()
         user = uh.get(self.__class__.user_id)
         self.assertEqual(user["email"], "test@blueshoe.de")
         self.assertEqual(user["username"], "testface")
+
+    def test_d2b_update_user(self):
+        uh = UserHandler()
+        new_email = "changed@blueshoe.de"
+        username = "changeface"
+        first_name = "changeface"
+        last_name = "changelast"
+        status = uh.update(
+            self.__class__.user_id,
+            {"email": new_email, "username": username, "firstName": first_name, "lastName": last_name},
+        )
+        self.assertEqual(status, 204)
+        user = uh.get(self.__class__.user_id)
+        self.assertEqual(user["email"], new_email)
+        self.assertEqual(user["username"], username)
+        self.assertEqual(user["firstName"], first_name)
+        self.assertEqual(user["lastName"], last_name)
 
     def test_d3_join_and_leave_group(self):
         uh = UserHandler()
@@ -77,7 +94,7 @@ class KeycloakClientTests(SimpleTestCase):
         self.assertEqual(user_groups[0]["id"], group_id)
         members = gh.members(group_id)
         self.assertIs(len(members), 1)
-        self.assertEqual(members[0]["email"], "test@blueshoe.de")
+        self.assertEqual(members[0]["email"], "changed@blueshoe.de")
         self.assertEqual(members[0]["id"], self.__class__.user_id)
         status = uh.leave_group(self.__class__.user_id, group_id)
         self.assertEqual(status, 204)
