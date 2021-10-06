@@ -90,7 +90,7 @@ class HelmRepositoryParserTests(TestCase):
         environment = RenderEnvironment(specs_data=[], values_path="buzzword-counter/helm_vars/development")
         result = parser.render(*[(deck, environment)])
         deck, updated_environment = result[0]
-        data = yaml.load(updated_environment.values_yaml)
+        data = yaml.load(updated_environment.values_yaml, Loader=yaml.FullLoader)
         self.assertIn("DJANGO_DEBUG", data["environmentVariables"])
         self.assertIn("CELERY_UID", data["environmentVariables"])
         self.assertIn("imageCredentials", data)
