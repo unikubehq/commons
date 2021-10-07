@@ -28,6 +28,17 @@ class UserHandler(KCAdminHandler):
 
     def update(self, user_id: str, data: dict) -> dict:
         """
+        `data` should be a json-serializable dictionary according to the user representation of the keycloak
+        API specification. See https://www.keycloak.org/docs-api/15.0/rest-api/index.html#_userrepresentation for more.
+
+        Example:
+            {
+                "email": "hello@world.com",
+                "firstName": "Hello",
+                "lastName": "World",
+                "username": "helloworldy"
+            }
+
         A "username" update is silently ignored by the API if the keycloak realm does not permit username updates.
         """
         url = f"{self.admin.get_full_url(self.base_path)}{user_id}"
