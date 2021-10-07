@@ -168,6 +168,6 @@ def update_nested_dict(d, u):
 def merge_multiple_yaml_files(*args):
     big_data = {}
     for i in args:
-        data = yaml.load(i)
+        data = yaml.load(i, Loader=yaml.SafeLoader)
         update_nested_dict(big_data, data)
     return yaml.dump(big_data)

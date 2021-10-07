@@ -141,7 +141,7 @@ class KeycloakDriver(object):
             name = self.get_realm_name()
         if base_url := self.get_url():
             realm_url = urljoin(base_url, "auth/admin/realms")
-            realm_body = {"realm": name, "enabled": True}
+            realm_body = {"realm": name, "enabled": True, "editUsernameAllowed": True}
             response = self.admin_client.post(realm_url, json=realm_body)
             return response
         else:
