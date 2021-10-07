@@ -33,7 +33,7 @@ class ChartYamlParser:
         """Retrieves deck information for a given Chart.yaml found in the temporary directory under `file_path`."""
         if os.path.isfile(file_path):
             with open(file_path) as fchart:
-                chart = yaml.load(fchart, Loader=yaml.FullLoader)
+                chart = yaml.load(fchart, Loader=yaml.SafeLoader)
                 service_name = chart.get("name", "<name not set>")
                 service_description = chart.get("description", "<description not set>")
                 service_type = chart.get("type", "")
@@ -79,7 +79,7 @@ class ChartYamlParser:
         with open(os.path.join(file_path, file_name), "r") as file:
             short_path = os.path.join(file_path[len(self.temporary_directory) :], file_name)
             try:
-                yaml_file = yaml.load(file, Loader=yaml.FullLoader)
+                yaml_file = yaml.load(file, Loader=yaml.SafeLoader)
             except MarkedYAMLError:
                 return FileInformation(path=short_path, encrypted=False, providers=[])
             sops = yaml_file.get("sops", False)
