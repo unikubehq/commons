@@ -23,7 +23,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        curl https://get.helm.sh/helm-v3.1.1-linux-amd64.tar.gz | tar xvz && sudo mv linux-amd64/helm /usr/local/bin/helm
+        curl https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz | tar xvz && sudo mv linux-amd64/helm /usr/local/bin/helm
+        helm plugin install https://github.com/nico-ulbricht/helm-multivalues
+        helm plugin install https://github.com/jkroepke/helm-secrets
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
