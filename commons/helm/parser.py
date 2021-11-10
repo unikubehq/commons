@@ -82,14 +82,16 @@ class ChartYamlParser:
                 yaml_file = yaml.load(file, Loader=yaml.SafeLoader)
             except MarkedYAMLError:
                 return FileInformation(path=short_path, encrypted=False, providers=[])
-            sops = yaml_file.get("sops", False)
-            encrypted = bool(sops)
-            providers = []
-            if encrypted:
-                for provider in ["kms", "gcp_kms", "pgp"]:
-                    if bool(sops.get(provider)):
-                        providers.append(provider)
-            return FileInformation(path=short_path, providers=providers, encrypted=encrypted)
+            if type(yaml_file) is dict:
+                sops = yaml_file.get("sops", False)
+                encrypted = bool(sops)
+                providers = []
+                if encrypted:
+                    for provider in ["kms", "gcp_kms", "pgp"]:
+                        if bool(sops.get(provider)):
+                            providers.append(provider)
+                return FileInformation(path=short_path, providers=providers, encrypted=encrypted)
+            return FileInformation(path=short_path, providers=[], encrypted=False)
 
 
 class SpecsParser:
