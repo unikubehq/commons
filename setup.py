@@ -25,7 +25,7 @@ setup(
         "jwt>=1.1.0",
         "django-hurricane>0.5.0",
         "gitpython~=3.1.9",
-        "pyyaml~=5.4.1",
+        "pyyaml>=5.4.1,<6.1.0",
         "python-keycloak-client~=0.2.3",
         "django-storages~=1.11",
         "django-storages[google]~=1.11",
