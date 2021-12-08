@@ -19,7 +19,7 @@ setup(
     long_description_content_type="text/markdown",
     version=VERSION,
     install_requires=[
-        "Django>=2.2,<3.0",
+        "Django>=2.2,<5.0",
         "django-extensions>=3.1",
         "django-tenants>=3.2",
         "jwt>=1.1.0",
