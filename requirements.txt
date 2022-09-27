@@ -1,6 +1,6 @@
 django>2.2,<3.0
 django-extensions>=3.1
-graphene-django~=2.15.0
+graphene-django~=3.0.0
 jwt>=1.1.0
 django-hurricane==0.9.0
 docker~=4.1.0
